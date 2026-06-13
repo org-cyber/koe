@@ -37,7 +37,6 @@
     flex-direction: column;
   }
 
-  /* ── TOP BAR ── */
   .topbar {
     height: 52px;
     background: var(--bg-surface);
@@ -83,8 +82,8 @@
 
   .pill.online { border-color: #166534; color: #22c55e; background: #052e16; }
   .pill.offline { border-color: #7f1d1d; color: #ef4444; background: #1c0b0b; }
+  .pill.engine { border-color: #1e3a8a; color: #60a5fa; background: #0f172a; }
 
-  /* ── LAYOUT ── */
   .workspace {
     display: grid;
     grid-template-columns: 280px 1fr 300px;
@@ -93,7 +92,6 @@
     height: calc(100vh - 52px);
   }
 
-  /* ── PANELS ── */
   .panel {
     border-right: 1px solid var(--border);
     display: flex;
@@ -112,6 +110,9 @@
     text-transform: uppercase;
     color: var(--text-muted);
     flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .panel-body {
@@ -127,7 +128,75 @@
   .panel-body::-webkit-scrollbar-track { background: transparent; }
   .panel-body::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
 
-  /* ── VOICE PANEL ── */
+  .engine-bar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .engine-bar label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .engine-select-wrap {
+    position: relative;
+    flex: 1;
+  }
+
+  .engine-select-wrap select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 7px 28px 7px 10px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .engine-select-wrap select:focus { border-color: var(--accent); }
+  .engine-select-wrap select option { background: var(--bg-raised); color: var(--text-primary); }
+
+  .engine-select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid var(--text-secondary);
+    pointer-events: none;
+  }
+
+  .engine-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    background: var(--bg-raised);
+    white-space: nowrap;
+  }
+
+  .engine-badge.cloud { border-color: #1e3a8a; color: #60a5fa; background: #0f172a; }
+  .engine-badge.local { border-color: #166534; color: #22c55e; background: #052e16; }
+
   .search-wrap { position: relative; }
 
   .search-wrap input {
@@ -227,7 +296,6 @@
   .voice-preview-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
   .voice-preview-btn svg { width: 11px; height: 11px; fill: currentColor; }
 
-  /* ── MAIN PANEL ── */
   .main-panel {
     display: flex;
     flex-direction: column;
@@ -284,7 +352,6 @@
   textarea:focus { border-color: var(--accent); }
   textarea::placeholder { color: var(--text-muted); }
 
-  /* ── CONTROLS ── */
   .controls-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -315,7 +382,11 @@
     cursor: pointer;
   }
 
-  /* ── WAVEFORM ── */
+  .ctrl-disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
   .waveform-wrap {
     background: var(--bg-surface);
     border: 1px solid var(--border);
@@ -356,7 +427,6 @@
     to   { opacity: 1; }
   }
 
-  /* ── ACTION BUTTONS ── */
   .action-row { display: flex; gap: 8px; }
 
   .btn {
@@ -389,7 +459,6 @@
 
   .btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* ── JOB QUEUE PANEL ── */
   .job-list { display: flex; flex-direction: column; gap: 6px; }
 
   .job-card {
@@ -476,7 +545,6 @@
 
   .empty-msg svg { width: 28px; height: 28px; stroke: var(--text-muted); fill: none; display: block; margin: 0 auto 8px; }
 
-  /* ── TOAST ── */
   .toast-wrap {
     position: fixed;
     bottom: 20px;
@@ -505,11 +573,35 @@
   .toast.show { opacity: 1; transform: translateY(0); }
   .toast.success { border-color: #166534; background: #052e16; color: #22c55e; }
   .toast.error   { border-color: #7f1d1d; background: #1c0b0b; color: #f87171; }
+
+  .piper-notice {
+    background: #052e16;
+    border: 1px solid #166534;
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #22c55e;
+    display: none;
+  }
+
+  .piper-notice.show { display: block; }
+
+  .piper-notice svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
 </style>
+<base target="_blank">
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
   <div class="logo">
     <div class="logo-mark">
@@ -518,36 +610,47 @@
     TTS Studio Pro
   </div>
   <div class="topbar-pills">
-    <span class="pill" id="enginePill">edge-tts · Docker</span>
+    <span class="pill engine" id="enginePill">Microsoft Neural</span>
     <span class="pill" id="serverPill">Checking…</span>
   </div>
 </div>
 
-<!-- WORKSPACE -->
 <div class="workspace">
 
-  <!-- VOICE PANEL -->
   <div class="panel">
-    <div class="panel-header">Voice library</div>
+    <div class="panel-header">
+      <span id="voicePanelTitle">Voice library</span>
+    </div>
     <div class="panel-body">
-      <!-- Search -->
       <div class="search-wrap">
         <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="voiceSearch" placeholder="Search voices…" oninput="renderVoices()">
       </div>
-      <!-- Language filter -->
       <div class="lang-filter" id="langFilter"></div>
-      <!-- Voice list -->
       <div class="voice-list" id="voiceList"></div>
     </div>
   </div>
 
-  <!-- MAIN PANEL -->
   <div class="panel main-panel">
     <div class="panel-header">Studio</div>
     <div class="panel-body">
 
-      <!-- Selected voice -->
+      <div class="engine-bar">
+        <label for="engineSelect">Engine</label>
+        <div class="engine-select-wrap">
+          <select id="engineSelect" onchange="onEngineChange()">
+            <option value="edge">Microsoft Neural (Cloud)</option>
+            <option value="piper">Piper Offline (Local)</option>
+          </select>
+        </div>
+        <span class="engine-badge cloud" id="engineBadge">Cloud</span>
+      </div>
+
+      <div class="piper-notice" id="piperNotice">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        Piper runs 100% offline. Rate & pitch controls are disabled. Output is WAV format.
+      </div>
+
       <div class="selected-voice-bar" id="selectedBar">
         <div class="voice-avatar" id="selectedAvatar" style="background:#1e2840;color:#8b97b2">—</div>
         <div>
@@ -557,14 +660,13 @@
         </div>
       </div>
 
-      <!-- Script -->
       <div class="script-wrap">
         <div class="script-meta">
           <span class="script-label">Script</span>
           <span id="scriptStats">0 chars · 0 words</span>
         </div>
         <textarea id="scriptText"
-          placeholder="Write or paste your script here. Each blank line creates a separate MP3 part in the output ZIP."
+          placeholder="Write or paste your script here. Each blank line creates a separate audio part in the output ZIP."
           oninput="updateStats()"></textarea>
         <div style="font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between">
           <span id="partCount"></span>
@@ -572,21 +674,19 @@
         </div>
       </div>
 
-      <!-- Controls -->
-      <div class="controls-grid">
-        <div class="ctrl">
+      <div class="controls-grid" id="controlsGrid">
+        <div class="ctrl" id="rateCtrl">
           <div class="ctrl-label">Speaking rate <span id="rateVal">1.0×</span></div>
           <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.1" value="1.0"
             oninput="document.getElementById('rateVal').textContent=parseFloat(this.value).toFixed(1)+'×'">
         </div>
-        <div class="ctrl">
+        <div class="ctrl" id="pitchCtrl">
           <div class="ctrl-label">Pitch <span id="pitchVal">0 Hz</span></div>
           <input type="range" id="pitchSlider" min="-20" max="20" step="1" value="0"
             oninput="document.getElementById('pitchVal').textContent=(this.value>0?'+':'')+this.value+' Hz'">
         </div>
       </div>
 
-      <!-- Waveform -->
       <div class="waveform-wrap">
         <div class="wave-meta">
           <span id="waveStatus">Waveform preview</span>
@@ -595,7 +695,6 @@
         <div class="wave-bars" id="waveBars"></div>
       </div>
 
-      <!-- Actions -->
       <div class="action-row">
         <button class="btn" id="previewBtn" onclick="previewVoice()">
           <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
@@ -610,7 +709,6 @@
     </div>
   </div>
 
-  <!-- JOB QUEUE PANEL -->
   <div class="panel" style="border-right:none">
     <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center">
       <span>Job queue</span>
@@ -628,65 +726,59 @@
 
 </div>
 
-<!-- TOAST CONTAINER -->
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-// ─────────────────────────────────────────────
-//  VOICE DATABASE
-// ─────────────────────────────────────────────
-const VOICES = [
-  // English US
+
+const EDGE_VOICES = [
   { id:"en-US-GuyNeural",      name:"Guy",       lang:"en-US", region:"English (US)",    gender:"Male",   style:"News",          color:"#4f46e5" },
   { id:"en-US-JennyNeural",    name:"Jenny",     lang:"en-US", region:"English (US)",    gender:"Female", style:"Friendly",      color:"#7c3aed" },
   { id:"en-US-AriaNeural",     name:"Aria",      lang:"en-US", region:"English (US)",    gender:"Female", style:"Natural",       color:"#9333ea" },
   { id:"en-US-DavisNeural",    name:"Davis",     lang:"en-US", region:"English (US)",    gender:"Male",   style:"Chat",          color:"#2563eb" },
   { id:"en-US-AndrewNeural",   name:"Andrew",    lang:"en-US", region:"English (US)",    gender:"Male",   style:"Warm",          color:"#1d4ed8" },
   { id:"en-US-EmmaNeural",     name:"Emma",      lang:"en-US", region:"English (US)",    gender:"Female", style:"Conversational",color:"#6d28d9" },
-  // English UK
   { id:"en-GB-RyanNeural",     name:"Ryan",      lang:"en-GB", region:"English (UK)",    gender:"Male",   style:"Chat",          color:"#0f766e" },
   { id:"en-GB-SoniaNeural",    name:"Sonia",     lang:"en-GB", region:"English (UK)",    gender:"Female", style:"Formal",        color:"#0d9488" },
   { id:"en-GB-LibbyNeural",    name:"Libby",     lang:"en-GB", region:"English (UK)",    gender:"Female", style:"Conversational",color:"#14b8a6" },
-  // English AU/CA/IN
   { id:"en-AU-NatashaNeural",  name:"Natasha",   lang:"en-AU", region:"English (AU)",    gender:"Female", style:"Natural",       color:"#d97706" },
   { id:"en-AU-WilliamNeural",  name:"William",   lang:"en-AU", region:"English (AU)",    gender:"Male",   style:"Natural",       color:"#b45309" },
   { id:"en-CA-ClaraNeural",    name:"Clara",     lang:"en-CA", region:"English (CA)",    gender:"Female", style:"Natural",       color:"#dc2626" },
   { id:"en-IN-NeerjaNeural",   name:"Neerja",    lang:"en-IN", region:"English (IN)",    gender:"Female", style:"Friendly",      color:"#ea580c" },
-  // Spanish
   { id:"es-ES-ElviraNeural",   name:"Elvira",    lang:"es-ES", region:"Spanish (ES)",    gender:"Female", style:"Warm",          color:"#be185d" },
   { id:"es-MX-DaliaNeural",    name:"Dalia",     lang:"es-MX", region:"Spanish (MX)",    gender:"Female", style:"Friendly",      color:"#9d174d" },
   { id:"es-US-PalomaNeural",   name:"Paloma",    lang:"es-US", region:"Spanish (US)",    gender:"Female", style:"Casual",        color:"#831843" },
-  // French
   { id:"fr-FR-DeniseNeural",   name:"Denise",    lang:"fr-FR", region:"French (FR)",     gender:"Female", style:"Elegant",       color:"#4338ca" },
   { id:"fr-CA-SylvieNeural",   name:"Sylvie",    lang:"fr-CA", region:"French (CA)",     gender:"Female", style:"Friendly",      color:"#3730a3" },
-  // German
   { id:"de-DE-KatjaNeural",    name:"Katja",     lang:"de-DE", region:"German (DE)",     gender:"Female", style:"Professional",  color:"#1e40af" },
   { id:"de-DE-ConradNeural",   name:"Conrad",    lang:"de-DE", region:"German (DE)",     gender:"Male",   style:"Professional",  color:"#1e3a8a" },
-  // Italian / Portuguese
   { id:"it-IT-ElsaNeural",     name:"Elsa",      lang:"it-IT", region:"Italian (IT)",    gender:"Female", style:"Warm",          color:"#166534" },
   { id:"pt-BR-FranciscaNeural",name:"Francisca", lang:"pt-BR", region:"Portuguese (BR)", gender:"Female", style:"Calm",          color:"#065f46" },
   { id:"pt-PT-RaquelNeural",   name:"Raquel",    lang:"pt-PT", region:"Portuguese (PT)", gender:"Female", style:"Warm",          color:"#064e3b" },
-  // Asian
   { id:"zh-CN-XiaoxiaoNeural", name:"Xiaoxiao",  lang:"zh-CN", region:"Chinese (CN)",    gender:"Female", style:"Warm",          color:"#7e22ce" },
   { id:"zh-CN-YunxiNeural",    name:"Yunxi",     lang:"zh-CN", region:"Chinese (CN)",    gender:"Male",   style:"Lively",        color:"#6b21a8" },
   { id:"ja-JP-NanamiNeural",   name:"Nanami",    lang:"ja-JP", region:"Japanese (JP)",   gender:"Female", style:"Polite",        color:"#be185d" },
   { id:"ko-KR-SunHiNeural",    name:"Sun-Hi",    lang:"ko-KR", region:"Korean (KR)",     gender:"Female", style:"Bright",        color:"#134e4a" },
-  // Arabic / Hindi
   { id:"ar-SA-ZariyahNeural",  name:"Zariyah",   lang:"ar-SA", region:"Arabic (SA)",     gender:"Female", style:"Natural",       color:"#78350f" },
   { id:"hi-IN-SwaraNeural",    name:"Swara",     lang:"hi-IN", region:"Hindi (IN)",      gender:"Female", style:"Friendly",      color:"#7c2d12" },
+];
+
+const PIPER_VOICES = [
+  { id:"en_US-lessac-medium", name:"Lessac", lang:"en-US", region:"English (US)", gender:"Male", style:"Natural", color:"#5b21b6" }
 ];
 
 const SERVER = "http://localhost:3000";
 const NUM_BARS = 32;
 let selectedVoice = null;
 let currentLang   = "all";
+let currentEngine = "edge";
 let jobs          = [];
 let waveInterval  = null;
 let pollIntervals = {};
 
-// ─────────────────────────────────────────────
-//  INIT
-// ─────────────────────────────────────────────
+function getVoices() {
+  return currentEngine === "piper" ? PIPER_VOICES : EDGE_VOICES;
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   buildWave();
   buildLangFilter();
@@ -694,11 +786,45 @@ window.addEventListener("DOMContentLoaded", () => {
   checkServer();
   loadStoredJobs();
   setInterval(checkServer, 30000);
+  onEngineChange();
 });
 
-// ─────────────────────────────────────────────
-//  SERVER HEALTH
-// ─────────────────────────────────────────────
+function onEngineChange() {
+  const select = document.getElementById("engineSelect");
+  currentEngine = select.value;
+
+  const enginePill = document.getElementById("enginePill");
+  const engineBadge = document.getElementById("engineBadge");
+  const piperNotice = document.getElementById("piperNotice");
+  const voicePanelTitle = document.getElementById("voicePanelTitle");
+
+  if (currentEngine === "piper") {
+    enginePill.textContent = "Piper Offline";
+    enginePill.className = "pill online";
+    engineBadge.textContent = "Local";
+    engineBadge.className = "engine-badge local";
+    piperNotice.classList.add("show");
+    voicePanelTitle.textContent = "Piper voices";
+    document.getElementById("rateCtrl").classList.add("ctrl-disabled");
+    document.getElementById("pitchCtrl").classList.add("ctrl-disabled");
+  } else {
+    enginePill.textContent = "Microsoft Neural";
+    enginePill.className = "pill engine";
+    engineBadge.textContent = "Cloud";
+    engineBadge.className = "engine-badge cloud";
+    piperNotice.classList.remove("show");
+    voicePanelTitle.textContent = "Voice library";
+    document.getElementById("rateCtrl").classList.remove("ctrl-disabled");
+    document.getElementById("pitchCtrl").classList.remove("ctrl-disabled");
+  }
+
+  selectedVoice = null;
+  currentLang = "all";
+  buildLangFilter();
+  renderVoices();
+  updateSelectedBar();
+}
+
 async function checkServer() {
   const pill = document.getElementById("serverPill");
   try {
@@ -714,9 +840,6 @@ async function checkServer() {
   }
 }
 
-// ─────────────────────────────────────────────
-//  WAVEFORM
-// ─────────────────────────────────────────────
 function buildWave() {
   const c = document.getElementById("waveBars");
   c.innerHTML = "";
@@ -752,9 +875,6 @@ function setWaveStatus(msg, estMsg = "") {
   document.getElementById("waveEst").textContent = estMsg;
 }
 
-// ─────────────────────────────────────────────
-//  LANGUAGE FILTER
-// ─────────────────────────────────────────────
 const LANG_MAP = {
   en: "English", es: "Spanish", fr: "French",
   de: "German",  it: "Italian", pt: "Portuguese",
@@ -763,11 +883,13 @@ const LANG_MAP = {
 };
 
 function buildLangFilter() {
-  const langs = [...new Set(VOICES.map(v => v.lang.split("-")[0]))];
+  const voices = getVoices();
+  const langs = [...new Set(voices.map(v => v.lang.split("-")[0]))];
   const wrap = document.getElementById("langFilter");
-  wrap.innerHTML = `<button class="lang-btn active" onclick="setLang('all',this)">All</button>`;
+  wrap.innerHTML = `<button class="lang-btn ${currentLang === 'all' ? 'active' : ''}" onclick="setLang('all',this)">All</button>`;
   langs.forEach(l => {
-    wrap.innerHTML += `<button class="lang-btn" onclick="setLang('${l}',this)">${LANG_MAP[l] || l.toUpperCase()}</button>`;
+    const isActive = currentLang === l ? 'active' : '';
+    wrap.innerHTML += `<button class="lang-btn ${isActive}" onclick="setLang('${l}',this)">${LANG_MAP[l] || l.toUpperCase()}</button>`;
   });
 }
 
@@ -778,16 +900,14 @@ function setLang(lang, btn) {
   renderVoices();
 }
 
-// ─────────────────────────────────────────────
-//  VOICE LIST
-// ─────────────────────────────────────────────
 function initials(name) {
   return name.split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
 function renderVoices() {
   const q = document.getElementById("voiceSearch").value.toLowerCase().trim();
-  const filtered = VOICES.filter(v => {
+  const voices = getVoices();
+  const filtered = voices.filter(v => {
     const langOk = currentLang === "all" || v.lang.startsWith(currentLang);
     const textOk = !q || v.name.toLowerCase().includes(q) || v.region.toLowerCase().includes(q) || v.style.toLowerCase().includes(q);
     return langOk && textOk;
@@ -816,25 +936,37 @@ function renderVoices() {
 }
 
 function selectVoice(id) {
-  selectedVoice = VOICES.find(v => v.id === id);
+  const voices = getVoices();
+  selectedVoice = voices.find(v => v.id === id);
   if (!selectedVoice) return;
   renderVoices();
+  updateSelectedBar();
+}
 
+function updateSelectedBar() {
   const av = document.getElementById("selectedAvatar");
+  const nameEl = document.getElementById("selectedName");
+  const metaEl = document.getElementById("selectedMeta");
+
+  if (!selectedVoice) {
+    av.textContent = "—";
+    av.style.background = "#1e2840";
+    av.style.color = "#8b97b2";
+    nameEl.textContent = "None — pick a voice";
+    metaEl.textContent = "";
+    return;
+  }
+
   av.textContent = initials(selectedVoice.name);
   av.style.background = selectedVoice.color + "22";
   av.style.color = selectedVoice.color;
 
-  document.getElementById("selectedName").textContent = selectedVoice.name;
-  document.getElementById("selectedMeta").textContent = `${selectedVoice.region} · ${selectedVoice.gender} · ${selectedVoice.style}`;
+  nameEl.textContent = selectedVoice.name;
+  metaEl.textContent = `${selectedVoice.region} · ${selectedVoice.gender} · ${selectedVoice.style}`;
 }
 
-// auto-select first voice
-selectVoice(VOICES[0].id);
+selectVoice(EDGE_VOICES[0].id);
 
-// ─────────────────────────────────────────────
-//  SCRIPT STATS
-// ─────────────────────────────────────────────
 function updateStats() {
   const text  = document.getElementById("scriptText").value;
   const chars = text.length;
@@ -847,31 +979,44 @@ function updateStats() {
   document.getElementById("scriptStats").textContent =
     `${chars.toLocaleString()} chars · ${words.toLocaleString()} words`;
   document.getElementById("partCount").textContent =
-    parts > 0 ? `${parts} part${parts !== 1 ? "s" : ""} (${parts} MP3 file${parts !== 1 ? "s" : ""})` : "";
+    parts > 0 ? `${parts} part${parts !== 1 ? "s" : ""} (${parts} audio file${parts !== 1 ? "s" : ""})` : "";
   document.getElementById("estDuration").textContent =
     secs > 0 ? `~${secs}s audio · ~${Math.ceil(secs / 8)}s to generate` : "";
 }
 
-// ─────────────────────────────────────────────
-//  PREVIEW
-// ─────────────────────────────────────────────
 async function quickPreview(voiceId) {
-  const v = VOICES.find(x => x.id === voiceId);
+  const voices = getVoices();
+  const v = voices.find(x => x.id === voiceId);
   if (!v) return;
+
   setWaveStatus(`Previewing ${v.name}…`);
   animateWave(true);
+
   try {
-    const res = await fetch(`${SERVER}/tts-preview`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        voice: voiceId,
-        text:  `Hi, I'm ${v.name}. ${v.style} voice, ready to narrate your content.`,
-        rate:  1,
-        pitch: 0,
-      })
-    });
+    let res;
+    if (currentEngine === "piper") {
+      res = await fetch(`${SERVER}/tts-preview-piper`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          voice: voiceId,
+          text: `Hi, I'm ${v.name}. This is a preview of my voice.`,
+        })
+      });
+    } else {
+      res = await fetch(`${SERVER}/tts-preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          voice: voiceId,
+          text:  `Hi, I'm ${v.name}. ${v.style} voice, ready to narrate your content.`,
+          rate:  1,
+          pitch: 0,
+        })
+      });
+    }
     if (!res.ok) throw new Error();
+    setWaveStatus(`Playing — ${v.name}`);
     playBlob(await res.blob(), () => {
       animateWave(false);
       setWaveStatus("Waveform preview");
@@ -885,6 +1030,7 @@ async function quickPreview(voiceId) {
 
 async function previewVoice() {
   if (!selectedVoice) { toast("Pick a voice first.", "error"); return; }
+
   const rate  = parseFloat(document.getElementById("rateSlider").value);
   const pitch = parseInt(document.getElementById("pitchSlider").value, 10);
 
@@ -893,16 +1039,28 @@ async function previewVoice() {
   document.getElementById("previewBtn").disabled = true;
 
   try {
-    const res = await fetch(`${SERVER}/tts-preview`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        voice: selectedVoice.id,
-        text:  `This is ${selectedVoice.name}, speaking at your selected rate and pitch. How does this sound for your project?`,
-        rate,
-        pitch,
-      })
-    });
+    let res;
+    if (currentEngine === "piper") {
+      res = await fetch(`${SERVER}/tts-preview-piper`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          voice: selectedVoice.id,
+          text: `This is ${selectedVoice.name}, speaking as a preview. How does this sound for your project?`,
+        })
+      });
+    } else {
+      res = await fetch(`${SERVER}/tts-preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          voice: selectedVoice.id,
+          text:  `This is ${selectedVoice.name}, speaking at your selected rate and pitch. How does this sound for your project?`,
+          rate,
+          pitch,
+        })
+      });
+    }
     if (!res.ok) throw new Error();
     setWaveStatus(`Playing — ${selectedVoice.name}`);
     playBlob(await res.blob(), () => {
@@ -924,9 +1082,6 @@ function playBlob(blob, onEnd) {
   audio.onended = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
 }
 
-// ─────────────────────────────────────────────
-//  GENERATE
-// ─────────────────────────────────────────────
 async function generate() {
   const text = document.getElementById("scriptText").value.trim();
   if (!text)          { toast("Write a script first.", "error"); return; }
@@ -934,6 +1089,7 @@ async function generate() {
 
   const rate  = parseFloat(document.getElementById("rateSlider").value);
   const pitch = parseInt(document.getElementById("pitchSlider").value, 10);
+  const engine = document.getElementById("engineSelect").value;
 
   document.getElementById("generateBtn").disabled = true;
   setWaveStatus("Submitting job…");
@@ -943,7 +1099,13 @@ async function generate() {
     const res = await fetch(`${SERVER}/tts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice: selectedVoice.id, rate, pitch })
+      body: JSON.stringify({
+        text,
+        voice: selectedVoice.id,
+        rate,
+        pitch,
+        engine
+      })
     });
 
     if (!res.ok) throw new Error(await res.text());
@@ -955,6 +1117,7 @@ async function generate() {
       status:    "processing",
       voice:     selectedVoice.name,
       voiceId:   selectedVoice.id,
+      engine:    engine,
       parts:     parts,
       wordCount: wordCount || words,
       progress:  0,
@@ -977,9 +1140,6 @@ async function generate() {
   document.getElementById("generateBtn").disabled = false;
 }
 
-// ─────────────────────────────────────────────
-//  JOB POLLING
-// ─────────────────────────────────────────────
 function startPolling(jobId) {
   if (pollIntervals[jobId]) return;
   pollIntervals[jobId] = setInterval(async () => {
@@ -1010,9 +1170,6 @@ function startPolling(jobId) {
   }, 2000);
 }
 
-// ─────────────────────────────────────────────
-//  DOWNLOAD / DELETE
-// ─────────────────────────────────────────────
 function downloadJob(jobId) {
   window.open(`${SERVER}/download/${jobId}`);
 }
@@ -1027,9 +1184,6 @@ async function deleteJob(jobId) {
   renderJobs();
 }
 
-// ─────────────────────────────────────────────
-//  RENDER JOBS
-// ─────────────────────────────────────────────
 function dotClass(status) {
   if (status === "done")   return "dot-done";
   if (status === "failed") return "dot-failed";
@@ -1069,11 +1223,12 @@ function renderJobs() {
     const isDone   = j.status === "done";
     const isFailed = j.status === "failed";
     const inProg   = !isDone && !isFailed;
+    const engineLabel = j.engine === "piper" ? "Piper" : "Edge";
     return `
     <div class="job-card" id="jc_${j.id}">
       <div class="job-card-top">
         <div class="status-dot ${dotClass(j.status)}"></div>
-        <div class="job-title">${j.voice} · ${(j.wordCount || 0).toLocaleString()} words</div>
+        <div class="job-title">${j.voice} · ${engineLabel} · ${(j.wordCount || 0).toLocaleString()} words</div>
       </div>
       <div class="job-sub">${friendlyStatus(j.status)}${j.parts ? ` · ${j.parts} part${j.parts !== 1 ? "s" : ""}` : ""}</div>
       ${inProg ? `<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progress}%"></div></div>` : ""}
@@ -1092,9 +1247,6 @@ function renderJobs() {
   }).join("");
 }
 
-// ─────────────────────────────────────────────
-//  LOCAL STORAGE (persist jobs across page reload)
-// ─────────────────────────────────────────────
 function saveStoredJobs() {
   try { localStorage.setItem("tts_jobs", JSON.stringify(jobs)); } catch {}
 }
@@ -1104,16 +1256,12 @@ function loadStoredJobs() {
     const stored = JSON.parse(localStorage.getItem("tts_jobs") || "[]");
     jobs = stored;
     renderJobs();
-    // resume polling for any in-progress jobs
     jobs.forEach(j => {
       if (j.status !== "done" && j.status !== "failed") startPolling(j.id);
     });
   } catch {}
 }
 
-// ─────────────────────────────────────────────
-//  TOAST
-// ─────────────────────────────────────────────
 function toast(msg, type = "info") {
   const wrap = document.getElementById("toastWrap");
   const el   = document.createElement("div");
