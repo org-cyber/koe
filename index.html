@@ -2,208 +2,1130 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TTS Studio Pro</title>
-
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-base:       #080c14;
+    --bg-surface:    #0f1624;
+    --bg-raised:     #161f30;
+    --bg-hover:      #1c2840;
+    --border:        #1e2d45;
+    --border-hi:     #2a3d5c;
+    --accent:        #5b6ef5;
+    --accent-dim:    #3b4cb8;
+    --accent-glow:   rgba(91,110,245,0.15);
+    --text-primary:  #e8eaf0;
+    --text-secondary:#8b97b2;
+    --text-muted:    #4a566e;
+    --success:       #22c55e;
+    --warning:       #f59e0b;
+    --danger:        #ef4444;
+    --radius-sm:     6px;
+    --radius-md:     10px;
+    --radius-lg:     14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+
   body {
-    margin: 0;
-    font-family: system-ui, -apple-system, sans-serif;
-    background: #0b0f19;
-    color: #e5e7eb;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    height: 52px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
     align-items: center;
-    height: 100vh;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
   }
 
-  .app {
-    width: 760px;
-    background: #111827;
-    border: 1px solid #1f2937;
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
 
-  .header {
+  .logo-mark {
+    width: 30px;
+    height: 30px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { width: 16px; height: 16px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; }
+
+  .topbar-pills { display: flex; align-items: center; gap: 8px; }
+
+  .pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    background: var(--bg-raised);
+  }
+
+  .pill.online { border-color: #166534; color: #22c55e; background: #052e16; }
+  .pill.offline { border-color: #7f1d1d; color: #ef4444; background: #1c0b0b; }
+
+  /* ── LAYOUT ── */
+  .workspace {
+    display: grid;
+    grid-template-columns: 280px 1fr 300px;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 52px);
+  }
+
+  /* ── PANELS ── */
+  .panel {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel:last-child { border-right: none; }
+
+  .panel-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .panel-body::-webkit-scrollbar { width: 4px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+
+  /* ── VOICE PANEL ── */
+  .search-wrap { position: relative; }
+
+  .search-wrap input {
+    width: 100%;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 8px 10px 8px 32px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-wrap input:focus { border-color: var(--accent); }
+
+  .search-wrap .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .lang-filter {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .lang-btn {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .lang-btn:hover { border-color: var(--border-hi); color: var(--text-primary); }
+  .lang-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .voice-list { display: flex; flex-direction: column; gap: 3px; }
+
+  .voice-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 9px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.1s;
+  }
+
+  .voice-row:hover { background: var(--bg-hover); }
+
+  .voice-row.selected {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+  }
+
+  .voice-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .voice-details { flex: 1; min-width: 0; }
+  .voice-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .voice-sub  { font-size: 11px; color: var(--text-secondary); }
+
+  .voice-preview-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border-hi);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.12s;
+  }
+
+  .voice-preview-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .voice-preview-btn svg { width: 11px; height: 11px; fill: currentColor; }
+
+  /* ── MAIN PANEL ── */
+  .main-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-base);
+  }
+
+  .main-panel .panel-body { gap: 14px; }
+
+  .selected-voice-bar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .selected-voice-bar .voice-avatar { width: 28px; height: 28px; font-size: 10px; }
+
+  .selected-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+  .selected-name  { font-size: 13px; font-weight: 500; }
+  .selected-meta  { font-size: 11px; color: var(--text-secondary); }
+
+  .script-wrap { display: flex; flex-direction: column; gap: 6px; }
+
+  .script-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+    font-size: 11px;
+    color: var(--text-muted);
   }
 
-  .title {
-    font-size: 18px;
-    font-weight: 600;
-  }
-
-  .badge {
-    font-size: 12px;
-    padding: 4px 10px;
-    background: #1d4ed8;
-    border-radius: 999px;
-    color: white;
-  }
-
-  select, textarea {
-    width: 100%;
-    border-radius: 10px;
-    border: 1px solid #374151;
-    background: #0f172a;
-    color: white;
-    padding: 12px;
-    outline: none;
-  }
+  .script-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
 
   textarea {
-    height: 220px;
-    margin-top: 12px;
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 12px 14px;
     resize: none;
+    outline: none;
+    font-family: inherit;
+    height: 220px;
+    transition: border-color 0.15s;
   }
 
-  .row {
-    display: flex;
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text-muted); }
+
+  /* ── CONTROLS ── */
+  .controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
-    margin-top: 12px;
   }
 
-  button {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
+  .ctrl {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+  }
+
+  .ctrl-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .ctrl-label span { color: var(--text-primary); font-weight: 500; }
+
+  input[type="range"] {
+    width: 100%;
+    height: 3px;
+    accent-color: var(--accent);
     cursor: pointer;
-    font-weight: 500;
   }
 
-  .primary {
-    background: #4f46e5;
+  /* ── WAVEFORM ── */
+  .waveform-wrap {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }
+
+  .wave-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .wave-bars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 40px;
+  }
+
+  .bar {
+    width: 3px;
+    border-radius: 2px;
+    background: var(--border-hi);
+    transition: height 0.08s ease;
+  }
+
+  .bar.live {
+    background: var(--accent);
+    animation: barPulse 0.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes barPulse {
+    from { opacity: 0.5; }
+    to   { opacity: 1; }
+  }
+
+  /* ── ACTION BUTTONS ── */
+  .action-row { display: flex; gap: 8px; }
+
+  .btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border-hi);
+    background: var(--bg-raised);
+    color: var(--text-primary);
+    transition: all 0.12s;
+  }
+
+  .btn:hover:not(:disabled) { background: var(--bg-hover); border-color: var(--accent); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
     color: white;
   }
 
-  .secondary {
-    background: #1f2937;
-    color: #e5e7eb;
+  .btn.primary:hover:not(:disabled) { background: var(--accent-dim); }
+
+  .btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── JOB QUEUE PANEL ── */
+  .job-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .job-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  .job-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .status {
-    margin-top: 12px;
-    font-size: 13px;
-    color: #9ca3af;
-    min-height: 18px;
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
-  .label {
+  .dot-processing { background: var(--warning); animation: dotBlink 1s infinite; }
+  .dot-generating { background: var(--accent);  animation: dotBlink 0.6s infinite; }
+  .dot-zipping    { background: #a855f7;         animation: dotBlink 0.8s infinite; }
+  .dot-done       { background: var(--success); }
+  .dot-failed     { background: var(--danger); }
+
+  @keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .job-title { font-size: 12px; font-weight: 500; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .job-sub   { font-size: 11px; color: var(--text-secondary); }
+  .job-time  { font-size: 10px; color: var(--text-muted); }
+
+  .progress-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .job-actions { display: flex; gap: 6px; }
+
+  .job-btn {
+    flex: 1;
+    font-size: 11px;
+    padding: 5px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-hi);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.12s;
+  }
+
+  .job-btn:hover { color: var(--text-primary); border-color: var(--accent); background: var(--accent-glow); }
+  .job-btn.dl    { color: var(--success); border-color: #166534; background: #052e16; }
+  .job-btn.dl:hover { background: #0a3d1d; }
+  .job-btn.del   { color: var(--danger); }
+  .job-btn.del:hover { border-color: var(--danger); background: #1c0b0b; }
+  .job-btn svg   { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .empty-msg {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-muted);
     font-size: 12px;
-    margin-top: 14px;
-    margin-bottom: 6px;
-    color: #9ca3af;
+    line-height: 1.7;
   }
+
+  .empty-msg svg { width: 28px; height: 28px; stroke: var(--text-muted); fill: none; display: block; margin: 0 auto 8px; }
+
+  /* ── TOAST ── */
+  .toast-wrap {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .toast {
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-hi);
+    background: var(--bg-raised);
+    color: var(--text-primary);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    pointer-events: auto;
+    max-width: 280px;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { border-color: #166534; background: #052e16; color: #22c55e; }
+  .toast.error   { border-color: #7f1d1d; background: #1c0b0b; color: #f87171; }
 </style>
 </head>
-
 <body>
 
-<div class="app">
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16"><polyline points="1,10 4,5 7,12 10,3 13,8 15,6"/></svg>
+    </div>
+    TTS Studio Pro
+  </div>
+  <div class="topbar-pills">
+    <span class="pill" id="enginePill">edge-tts · Docker</span>
+    <span class="pill" id="serverPill">Checking…</span>
+  </div>
+</div>
 
-  <div class="header">
-    <div class="title">TTS Studio Pro</div>
-    <div class="badge">Docker Engine</div>
+<!-- WORKSPACE -->
+<div class="workspace">
+
+  <!-- VOICE PANEL -->
+  <div class="panel">
+    <div class="panel-header">Voice library</div>
+    <div class="panel-body">
+      <!-- Search -->
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="voiceSearch" placeholder="Search voices…" oninput="renderVoices()">
+      </div>
+      <!-- Language filter -->
+      <div class="lang-filter" id="langFilter"></div>
+      <!-- Voice list -->
+      <div class="voice-list" id="voiceList"></div>
+    </div>
   </div>
 
-  <div class="label">Voice</div>
-  <select id="voice">
-    <option value="en-US-GuyNeural">Male (US) - Guy</option>
-    <option value="en-US-JennyNeural">Female (US) - Jenny</option>
-    <option value="en-GB-RyanNeural">Male (UK) - Ryan</option>
-    <option value="en-GB-SoniaNeural">Female (UK) - Sonia</option>
-  </select>
+  <!-- MAIN PANEL -->
+  <div class="panel main-panel">
+    <div class="panel-header">Studio</div>
+    <div class="panel-body">
 
-  <div class="row">
-    <button class="secondary" onclick="previewVoice()">Preview Voice</button>
+      <!-- Selected voice -->
+      <div class="selected-voice-bar" id="selectedBar">
+        <div class="voice-avatar" id="selectedAvatar" style="background:#1e2840;color:#8b97b2">—</div>
+        <div>
+          <div class="selected-label">Selected voice</div>
+          <div class="selected-name" id="selectedName">None — pick a voice</div>
+          <div class="selected-meta" id="selectedMeta"></div>
+        </div>
+      </div>
+
+      <!-- Script -->
+      <div class="script-wrap">
+        <div class="script-meta">
+          <span class="script-label">Script</span>
+          <span id="scriptStats">0 chars · 0 words</span>
+        </div>
+        <textarea id="scriptText"
+          placeholder="Write or paste your script here. Each blank line creates a separate MP3 part in the output ZIP."
+          oninput="updateStats()"></textarea>
+        <div style="font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between">
+          <span id="partCount"></span>
+          <span id="estDuration"></span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-grid">
+        <div class="ctrl">
+          <div class="ctrl-label">Speaking rate <span id="rateVal">1.0×</span></div>
+          <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.1" value="1.0"
+            oninput="document.getElementById('rateVal').textContent=parseFloat(this.value).toFixed(1)+'×'">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-label">Pitch <span id="pitchVal">0 Hz</span></div>
+          <input type="range" id="pitchSlider" min="-20" max="20" step="1" value="0"
+            oninput="document.getElementById('pitchVal').textContent=(this.value>0?'+':'')+this.value+' Hz'">
+        </div>
+      </div>
+
+      <!-- Waveform -->
+      <div class="waveform-wrap">
+        <div class="wave-meta">
+          <span id="waveStatus">Waveform preview</span>
+          <span id="waveEst"></span>
+        </div>
+        <div class="wave-bars" id="waveBars"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-row">
+        <button class="btn" id="previewBtn" onclick="previewVoice()">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          Preview voice
+        </button>
+        <button class="btn primary" id="generateBtn" onclick="generate()">
+          <svg viewBox="0 0 24 24"><polyline points="1,10 4,5 7,12 10,3 13,8 16,6"/></svg>
+          Generate audio
+        </button>
+      </div>
+
+    </div>
   </div>
 
-  <div class="label">Script</div>
-  <textarea id="text" placeholder="Write your YouTube script..."></textarea>
-
-  <div class="row">
-    <button class="primary" id="generateBtn" onclick="generate()">Generate Audio</button>
+  <!-- JOB QUEUE PANEL -->
+  <div class="panel" style="border-right:none">
+    <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Job queue</span>
+      <span id="jobCount" style="font-size:10px;color:var(--text-muted);text-transform:none;letter-spacing:0"></span>
+    </div>
+    <div class="panel-body">
+      <div class="job-list" id="jobList">
+        <div class="empty-msg">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>
+          No jobs yet.<br>Generate audio to see jobs here.
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="status" id="status"></div>
 
 </div>
 
-<script>
-const status = document.getElementById("status");
-const btn = document.getElementById("generateBtn");
+<!-- TOAST CONTAINER -->
+<div class="toast-wrap" id="toastWrap"></div>
 
-function setStatus(msg) {
-  status.innerText = msg;
+<script>
+// ─────────────────────────────────────────────
+//  VOICE DATABASE
+// ─────────────────────────────────────────────
+const VOICES = [
+  // English US
+  { id:"en-US-GuyNeural",      name:"Guy",       lang:"en-US", region:"English (US)",    gender:"Male",   style:"News",          color:"#4f46e5" },
+  { id:"en-US-JennyNeural",    name:"Jenny",     lang:"en-US", region:"English (US)",    gender:"Female", style:"Friendly",      color:"#7c3aed" },
+  { id:"en-US-AriaNeural",     name:"Aria",      lang:"en-US", region:"English (US)",    gender:"Female", style:"Natural",       color:"#9333ea" },
+  { id:"en-US-DavisNeural",    name:"Davis",     lang:"en-US", region:"English (US)",    gender:"Male",   style:"Chat",          color:"#2563eb" },
+  { id:"en-US-AndrewNeural",   name:"Andrew",    lang:"en-US", region:"English (US)",    gender:"Male",   style:"Warm",          color:"#1d4ed8" },
+  { id:"en-US-EmmaNeural",     name:"Emma",      lang:"en-US", region:"English (US)",    gender:"Female", style:"Conversational",color:"#6d28d9" },
+  // English UK
+  { id:"en-GB-RyanNeural",     name:"Ryan",      lang:"en-GB", region:"English (UK)",    gender:"Male",   style:"Chat",          color:"#0f766e" },
+  { id:"en-GB-SoniaNeural",    name:"Sonia",     lang:"en-GB", region:"English (UK)",    gender:"Female", style:"Formal",        color:"#0d9488" },
+  { id:"en-GB-LibbyNeural",    name:"Libby",     lang:"en-GB", region:"English (UK)",    gender:"Female", style:"Conversational",color:"#14b8a6" },
+  // English AU/CA/IN
+  { id:"en-AU-NatashaNeural",  name:"Natasha",   lang:"en-AU", region:"English (AU)",    gender:"Female", style:"Natural",       color:"#d97706" },
+  { id:"en-AU-WilliamNeural",  name:"William",   lang:"en-AU", region:"English (AU)",    gender:"Male",   style:"Natural",       color:"#b45309" },
+  { id:"en-CA-ClaraNeural",    name:"Clara",     lang:"en-CA", region:"English (CA)",    gender:"Female", style:"Natural",       color:"#dc2626" },
+  { id:"en-IN-NeerjaNeural",   name:"Neerja",    lang:"en-IN", region:"English (IN)",    gender:"Female", style:"Friendly",      color:"#ea580c" },
+  // Spanish
+  { id:"es-ES-ElviraNeural",   name:"Elvira",    lang:"es-ES", region:"Spanish (ES)",    gender:"Female", style:"Warm",          color:"#be185d" },
+  { id:"es-MX-DaliaNeural",    name:"Dalia",     lang:"es-MX", region:"Spanish (MX)",    gender:"Female", style:"Friendly",      color:"#9d174d" },
+  { id:"es-US-PalomaNeural",   name:"Paloma",    lang:"es-US", region:"Spanish (US)",    gender:"Female", style:"Casual",        color:"#831843" },
+  // French
+  { id:"fr-FR-DeniseNeural",   name:"Denise",    lang:"fr-FR", region:"French (FR)",     gender:"Female", style:"Elegant",       color:"#4338ca" },
+  { id:"fr-CA-SylvieNeural",   name:"Sylvie",    lang:"fr-CA", region:"French (CA)",     gender:"Female", style:"Friendly",      color:"#3730a3" },
+  // German
+  { id:"de-DE-KatjaNeural",    name:"Katja",     lang:"de-DE", region:"German (DE)",     gender:"Female", style:"Professional",  color:"#1e40af" },
+  { id:"de-DE-ConradNeural",   name:"Conrad",    lang:"de-DE", region:"German (DE)",     gender:"Male",   style:"Professional",  color:"#1e3a8a" },
+  // Italian / Portuguese
+  { id:"it-IT-ElsaNeural",     name:"Elsa",      lang:"it-IT", region:"Italian (IT)",    gender:"Female", style:"Warm",          color:"#166534" },
+  { id:"pt-BR-FranciscaNeural",name:"Francisca", lang:"pt-BR", region:"Portuguese (BR)", gender:"Female", style:"Calm",          color:"#065f46" },
+  { id:"pt-PT-RaquelNeural",   name:"Raquel",    lang:"pt-PT", region:"Portuguese (PT)", gender:"Female", style:"Warm",          color:"#064e3b" },
+  // Asian
+  { id:"zh-CN-XiaoxiaoNeural", name:"Xiaoxiao",  lang:"zh-CN", region:"Chinese (CN)",    gender:"Female", style:"Warm",          color:"#7e22ce" },
+  { id:"zh-CN-YunxiNeural",    name:"Yunxi",     lang:"zh-CN", region:"Chinese (CN)",    gender:"Male",   style:"Lively",        color:"#6b21a8" },
+  { id:"ja-JP-NanamiNeural",   name:"Nanami",    lang:"ja-JP", region:"Japanese (JP)",   gender:"Female", style:"Polite",        color:"#be185d" },
+  { id:"ko-KR-SunHiNeural",    name:"Sun-Hi",    lang:"ko-KR", region:"Korean (KR)",     gender:"Female", style:"Bright",        color:"#134e4a" },
+  // Arabic / Hindi
+  { id:"ar-SA-ZariyahNeural",  name:"Zariyah",   lang:"ar-SA", region:"Arabic (SA)",     gender:"Female", style:"Natural",       color:"#78350f" },
+  { id:"hi-IN-SwaraNeural",    name:"Swara",     lang:"hi-IN", region:"Hindi (IN)",      gender:"Female", style:"Friendly",      color:"#7c2d12" },
+];
+
+const SERVER = "http://localhost:3000";
+const NUM_BARS = 32;
+let selectedVoice = null;
+let currentLang   = "all";
+let jobs          = [];
+let waveInterval  = null;
+let pollIntervals = {};
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  buildWave();
+  buildLangFilter();
+  renderVoices();
+  checkServer();
+  loadStoredJobs();
+  setInterval(checkServer, 30000);
+});
+
+// ─────────────────────────────────────────────
+//  SERVER HEALTH
+// ─────────────────────────────────────────────
+async function checkServer() {
+  const pill = document.getElementById("serverPill");
+  try {
+    const res = await fetch(`${SERVER}/health`, { signal: AbortSignal.timeout(3000) });
+    if (res.ok) {
+      const d = await res.json();
+      pill.textContent = `● Server online`;
+      pill.className = "pill online";
+    } else { throw new Error(); }
+  } catch {
+    pill.textContent = "● Server offline";
+    pill.className = "pill offline";
+  }
 }
 
-/* ---------------- PREVIEW VOICE ---------------- */
-async function previewVoice() {
-  const voice = document.getElementById("voice").value;
+// ─────────────────────────────────────────────
+//  WAVEFORM
+// ─────────────────────────────────────────────
+function buildWave() {
+  const c = document.getElementById("waveBars");
+  c.innerHTML = "";
+  for (let i = 0; i < NUM_BARS; i++) {
+    const b = document.createElement("div");
+    b.className = "bar";
+    b.id = "bar" + i;
+    b.style.height = Math.max(4, Math.round(6 + Math.random() * 18)) + "px";
+    c.appendChild(b);
+  }
+}
 
-  setStatus("Generating preview...");
+function animateWave(active) {
+  clearInterval(waveInterval);
+  for (let i = 0; i < NUM_BARS; i++) {
+    const b = document.getElementById("bar" + i);
+    if (!b) continue;
+    b.className = active ? "bar live" : "bar";
+    if (!active) b.style.height = Math.max(4, Math.round(6 + Math.random() * 18)) + "px";
+  }
+  if (active) {
+    waveInterval = setInterval(() => {
+      for (let i = 0; i < NUM_BARS; i++) {
+        const b = document.getElementById("bar" + i);
+        if (b) b.style.height = Math.max(6, Math.round(10 + Math.random() * 26)) + "px";
+      }
+    }, 100);
+  }
+}
 
-  const res = await fetch("http://localhost:3000/tts-preview", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      voice,
-      text: "This is a voice preview for your selected narrator."
-    })
+function setWaveStatus(msg, estMsg = "") {
+  document.getElementById("waveStatus").textContent = msg;
+  document.getElementById("waveEst").textContent = estMsg;
+}
+
+// ─────────────────────────────────────────────
+//  LANGUAGE FILTER
+// ─────────────────────────────────────────────
+const LANG_MAP = {
+  en: "English", es: "Spanish", fr: "French",
+  de: "German",  it: "Italian", pt: "Portuguese",
+  zh: "Chinese", ja: "Japanese",ko: "Korean",
+  ar: "Arabic",  hi: "Hindi"
+};
+
+function buildLangFilter() {
+  const langs = [...new Set(VOICES.map(v => v.lang.split("-")[0]))];
+  const wrap = document.getElementById("langFilter");
+  wrap.innerHTML = `<button class="lang-btn active" onclick="setLang('all',this)">All</button>`;
+  langs.forEach(l => {
+    wrap.innerHTML += `<button class="lang-btn" onclick="setLang('${l}',this)">${LANG_MAP[l] || l.toUpperCase()}</button>`;
+  });
+}
+
+function setLang(lang, btn) {
+  currentLang = lang;
+  document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderVoices();
+}
+
+// ─────────────────────────────────────────────
+//  VOICE LIST
+// ─────────────────────────────────────────────
+function initials(name) {
+  return name.split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
+}
+
+function renderVoices() {
+  const q = document.getElementById("voiceSearch").value.toLowerCase().trim();
+  const filtered = VOICES.filter(v => {
+    const langOk = currentLang === "all" || v.lang.startsWith(currentLang);
+    const textOk = !q || v.name.toLowerCase().includes(q) || v.region.toLowerCase().includes(q) || v.style.toLowerCase().includes(q);
+    return langOk && textOk;
   });
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
+  const list = document.getElementById("voiceList");
 
-  const audio = new Audio(url);
-  audio.play();
-
-  setStatus("Preview playing.");
-}
-
-/* ---------------- FULL GENERATION ---------------- */
-async function generate() {
-  const text = document.getElementById("text").value;
-  const voice = document.getElementById("voice").value;
-
-  if (!text.trim()) return;
-
-  btn.disabled = true;
-  setStatus("Generating audio...");
-
-  try {
-    const res = await fetch("http://localhost:3000/tts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice })
-    });
-
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "voice.zip";
-    a.click();
-
-    setStatus("Done. Download started.");
-  } catch (e) {
-    setStatus("Error generating audio.");
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-msg" style="padding:20px 0">No voices match.</div>`;
+    return;
   }
 
-  btn.disabled = false;
+  list.innerHTML = filtered.map(v => `
+    <div class="voice-row${selectedVoice && selectedVoice.id === v.id ? " selected" : ""}"
+         id="vr_${v.id}" onclick="selectVoice('${v.id}')">
+      <div class="voice-avatar" style="background:${v.color}22;color:${v.color}">${initials(v.name)}</div>
+      <div class="voice-details">
+        <div class="voice-name">${v.name}</div>
+        <div class="voice-sub">${v.gender} · ${v.style}</div>
+      </div>
+      <button class="voice-preview-btn" onclick="event.stopPropagation();quickPreview('${v.id}')" title="Preview ${v.name}">
+        <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg>
+      </button>
+    </div>
+  `).join("");
+}
+
+function selectVoice(id) {
+  selectedVoice = VOICES.find(v => v.id === id);
+  if (!selectedVoice) return;
+  renderVoices();
+
+  const av = document.getElementById("selectedAvatar");
+  av.textContent = initials(selectedVoice.name);
+  av.style.background = selectedVoice.color + "22";
+  av.style.color = selectedVoice.color;
+
+  document.getElementById("selectedName").textContent = selectedVoice.name;
+  document.getElementById("selectedMeta").textContent = `${selectedVoice.region} · ${selectedVoice.gender} · ${selectedVoice.style}`;
+}
+
+// auto-select first voice
+selectVoice(VOICES[0].id);
+
+// ─────────────────────────────────────────────
+//  SCRIPT STATS
+// ─────────────────────────────────────────────
+function updateStats() {
+  const text  = document.getElementById("scriptText").value;
+  const chars = text.length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const secs  = Math.round(words / 2.5);
+  const parts = text.trim()
+    ? text.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean).length
+    : 0;
+
+  document.getElementById("scriptStats").textContent =
+    `${chars.toLocaleString()} chars · ${words.toLocaleString()} words`;
+  document.getElementById("partCount").textContent =
+    parts > 0 ? `${parts} part${parts !== 1 ? "s" : ""} (${parts} MP3 file${parts !== 1 ? "s" : ""})` : "";
+  document.getElementById("estDuration").textContent =
+    secs > 0 ? `~${secs}s audio · ~${Math.ceil(secs / 8)}s to generate` : "";
+}
+
+// ─────────────────────────────────────────────
+//  PREVIEW
+// ─────────────────────────────────────────────
+async function quickPreview(voiceId) {
+  const v = VOICES.find(x => x.id === voiceId);
+  if (!v) return;
+  setWaveStatus(`Previewing ${v.name}…`);
+  animateWave(true);
+  try {
+    const res = await fetch(`${SERVER}/tts-preview`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        voice: voiceId,
+        text:  `Hi, I'm ${v.name}. ${v.style} voice, ready to narrate your content.`,
+        rate:  1,
+        pitch: 0,
+      })
+    });
+    if (!res.ok) throw new Error();
+    playBlob(await res.blob(), () => {
+      animateWave(false);
+      setWaveStatus("Waveform preview");
+    });
+  } catch {
+    animateWave(false);
+    setWaveStatus("Preview failed — is the server running?");
+    toast("Server unreachable. Start server.js first.", "error");
+  }
+}
+
+async function previewVoice() {
+  if (!selectedVoice) { toast("Pick a voice first.", "error"); return; }
+  const rate  = parseFloat(document.getElementById("rateSlider").value);
+  const pitch = parseInt(document.getElementById("pitchSlider").value, 10);
+
+  setWaveStatus(`Generating preview with ${selectedVoice.name}…`);
+  animateWave(true);
+  document.getElementById("previewBtn").disabled = true;
+
+  try {
+    const res = await fetch(`${SERVER}/tts-preview`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        voice: selectedVoice.id,
+        text:  `This is ${selectedVoice.name}, speaking at your selected rate and pitch. How does this sound for your project?`,
+        rate,
+        pitch,
+      })
+    });
+    if (!res.ok) throw new Error();
+    setWaveStatus(`Playing — ${selectedVoice.name}`);
+    playBlob(await res.blob(), () => {
+      animateWave(false);
+      setWaveStatus("Waveform preview");
+    });
+  } catch {
+    animateWave(false);
+    setWaveStatus("Preview failed");
+    toast("Preview failed. Check the server.", "error");
+  }
+  document.getElementById("previewBtn").disabled = false;
+}
+
+function playBlob(blob, onEnd) {
+  const url   = URL.createObjectURL(blob);
+  const audio = new Audio(url);
+  audio.play();
+  audio.onended = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
+}
+
+// ─────────────────────────────────────────────
+//  GENERATE
+// ─────────────────────────────────────────────
+async function generate() {
+  const text = document.getElementById("scriptText").value.trim();
+  if (!text)          { toast("Write a script first.", "error"); return; }
+  if (!selectedVoice) { toast("Pick a voice first.",  "error"); return; }
+
+  const rate  = parseFloat(document.getElementById("rateSlider").value);
+  const pitch = parseInt(document.getElementById("pitchSlider").value, 10);
+
+  document.getElementById("generateBtn").disabled = true;
+  setWaveStatus("Submitting job…");
+  animateWave(true);
+
+  try {
+    const res = await fetch(`${SERVER}/tts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, voice: selectedVoice.id, rate, pitch })
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+    const { jobId, parts, wordCount } = await res.json();
+
+    const words = text.trim().split(/\s+/).length;
+    const job = {
+      id:        jobId,
+      status:    "processing",
+      voice:     selectedVoice.name,
+      voiceId:   selectedVoice.id,
+      parts:     parts,
+      wordCount: wordCount || words,
+      progress:  0,
+      createdAt: new Date().toISOString(),
+    };
+
+    jobs.unshift(job);
+    saveStoredJobs();
+    renderJobs();
+    setWaveStatus(`Job ${jobId.slice(-5)} queued — ${parts} part${parts !== 1 ? "s" : ""}`, `~${Math.ceil(words / 2.5 / 8)}s`);
+    toast(`Job started — ${parts} part${parts !== 1 ? "s" : ""} queued`, "success");
+    startPolling(jobId);
+  } catch (err) {
+    animateWave(false);
+    setWaveStatus("Submit failed");
+    toast("Failed to start job. Is the server running?", "error");
+    console.error(err);
+  }
+
+  document.getElementById("generateBtn").disabled = false;
+}
+
+// ─────────────────────────────────────────────
+//  JOB POLLING
+// ─────────────────────────────────────────────
+function startPolling(jobId) {
+  if (pollIntervals[jobId]) return;
+  pollIntervals[jobId] = setInterval(async () => {
+    try {
+      const res  = await fetch(`${SERVER}/job/${jobId}`);
+      const data = await res.json();
+      const idx  = jobs.findIndex(j => j.id === jobId);
+      if (idx !== -1) {
+        jobs[idx] = { ...jobs[idx], ...data };
+        saveStoredJobs();
+        renderJobs();
+      }
+      if (data.status === "done" || data.status === "failed") {
+        clearInterval(pollIntervals[jobId]);
+        delete pollIntervals[jobId];
+        animateWave(false);
+        if (data.status === "done") {
+          setWaveStatus("Ready to download");
+          toast(`Done! ${jobs[idx]?.voice || "Audio"} is ready.`, "success");
+        } else {
+          setWaveStatus("Generation failed");
+          toast("Job failed. Check server logs.", "error");
+        }
+      }
+    } catch {
+      // network hiccup — keep polling
+    }
+  }, 2000);
+}
+
+// ─────────────────────────────────────────────
+//  DOWNLOAD / DELETE
+// ─────────────────────────────────────────────
+function downloadJob(jobId) {
+  window.open(`${SERVER}/download/${jobId}`);
+}
+
+async function deleteJob(jobId) {
+  try {
+    await fetch(`${SERVER}/job/${jobId}`, { method: "DELETE" });
+  } catch {}
+  if (pollIntervals[jobId]) { clearInterval(pollIntervals[jobId]); delete pollIntervals[jobId]; }
+  jobs = jobs.filter(j => j.id !== jobId);
+  saveStoredJobs();
+  renderJobs();
+}
+
+// ─────────────────────────────────────────────
+//  RENDER JOBS
+// ─────────────────────────────────────────────
+function dotClass(status) {
+  if (status === "done")   return "dot-done";
+  if (status === "failed") return "dot-failed";
+  if (status && status.startsWith("zipping")) return "dot-zipping";
+  if (status && status.startsWith("generating")) return "dot-generating";
+  return "dot-processing";
+}
+
+function friendlyStatus(status) {
+  if (!status) return "unknown";
+  if (status.startsWith("generating")) return status;
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function timeAgo(iso) {
+  const diff = Math.round((Date.now() - new Date(iso)) / 1000);
+  if (diff < 60)   return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  return `${Math.floor(diff / 3600)}h ago`;
+}
+
+function renderJobs() {
+  const list = document.getElementById("jobList");
+  document.getElementById("jobCount").textContent =
+    jobs.length ? `${jobs.length} job${jobs.length !== 1 ? "s" : ""}` : "";
+
+  if (!jobs.length) {
+    list.innerHTML = `<div class="empty-msg">
+      <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>
+      No jobs yet.<br>Generate audio to see jobs here.
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = jobs.map(j => {
+    const progress = j.progress || 0;
+    const isDone   = j.status === "done";
+    const isFailed = j.status === "failed";
+    const inProg   = !isDone && !isFailed;
+    return `
+    <div class="job-card" id="jc_${j.id}">
+      <div class="job-card-top">
+        <div class="status-dot ${dotClass(j.status)}"></div>
+        <div class="job-title">${j.voice} · ${(j.wordCount || 0).toLocaleString()} words</div>
+      </div>
+      <div class="job-sub">${friendlyStatus(j.status)}${j.parts ? ` · ${j.parts} part${j.parts !== 1 ? "s" : ""}` : ""}</div>
+      ${inProg ? `<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progress}%"></div></div>` : ""}
+      <div class="job-time">${timeAgo(j.createdAt)}</div>
+      <div class="job-actions">
+        ${isDone ? `<button class="job-btn dl" onclick="downloadJob('${j.id}')">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download ZIP
+        </button>` : ""}
+        <button class="job-btn del" onclick="deleteJob('${j.id}')">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          ${isDone || isFailed ? "Remove" : "Cancel"}
+        </button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ─────────────────────────────────────────────
+//  LOCAL STORAGE (persist jobs across page reload)
+// ─────────────────────────────────────────────
+function saveStoredJobs() {
+  try { localStorage.setItem("tts_jobs", JSON.stringify(jobs)); } catch {}
+}
+
+function loadStoredJobs() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("tts_jobs") || "[]");
+    jobs = stored;
+    renderJobs();
+    // resume polling for any in-progress jobs
+    jobs.forEach(j => {
+      if (j.status !== "done" && j.status !== "failed") startPolling(j.id);
+    });
+  } catch {}
+}
+
+// ─────────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────────
+function toast(msg, type = "info") {
+  const wrap = document.getElementById("toastWrap");
+  const el   = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(() => { el.classList.add("show"); });
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 250);
+  }, 3500);
 }
 </script>
-
 </body>
 </html>
